@@ -1,0 +1,218 @@
+# MK Action Package - Windsurf AI Rules
+
+## Project Context
+
+Laravel PHP package "mk/action" - A powerful action system with fluent API, validation, and HTTP endpoints for Laravel applications.
+
+## Tech Stack
+
+- **Language**: PHP 8.3+
+- **Framework**: Laravel 12.30+
+- **Validation**: Spatie Laravel Data 4.0+
+- **Testing**: Pest with Orchestra Testbench
+- **Architecture**: Action-based pattern with fluent API
+
+## Core Architecture
+
+### Action Pattern
+
+Every action extends `BaseAction` and implements:
+
+```php
+public static function name(): string;           // Unique action identifier
+public static function getDataType(): string;    // Associated data class
+public function handle(Data $data): mixed;       // Business logic
+```
+
+### Fluent API
+
+Primary interface for action execution:
+
+```php
+Action::make('action-name')->with($data)->execute();
+Action::execute('action-name', $data);  // Direct execution
+```
+
+### Data Validation
+
+Uses Spatie Laravel Data with attributes:
+
+```php
+#[Required, Email, Unique('users', 'email')]
+public string $email
+```
+
+## Key Design Principles
+
+1. **Type Safety First**: All methods must have proper type hints and return types
+2. **Fluent Interface**: Builder pattern for action execution
+3. **Auto-Discovery**: Actions are automatically registered via service provider
+4. **Validation**: Built-in validation using Laravel Data attributes
+5. **HTTP Ready**: RESTful endpoints for action listing and execution
+
+## File Structure Standards
+
+### Source Files (`src/`)
+
+- `BaseAction.php` - Abstract base for all actions
+- `ActionManager.php` - Fluent API implementation
+- `ActionBuilder.php` - Builder pattern implementation
+- `ActionRegistry.php` - Action registration and discovery
+- `Facades/Action.php` - Laravel facade
+- `Http/Controllers/ActionController.php` - HTTP endpoints
+- `Data/ActionData.php` - Request data structure
+
+### Test Files (`tests/`)
+
+- Must use proper namespaces: `MK\Action\Tests\{Unit|Feature}\`
+- Import all required exceptions: `InvalidArgumentException`
+- Follow naming: `{Class}Test.php`
+
+## Coding Standards
+
+### Action Implementation
+
+```php
+class ExampleAction extends BaseAction
+{
+    public static function name(): string
+    {
+        return 'example-action';
+    }
+
+    public static function getDataType(): string
+    {
+        return ExampleData::class;
+    }
+
+    public function handle(Data $data): array
+    {
+        /** @var ExampleData $data */  // IDE type hinting
+
+        try {
+            // Business logic here
+            return ['success' => true, 'result' => $result];
+        } catch (\Exception $e) {
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+}
+```
+
+### Data Object Pattern
+
+```php
+class ExampleData extends Data
+{
+    public function __construct(
+        #[Required, Min(2)]
+        public string $name,
+
+        #[Email, Required]
+        public string $email,
+    ) {}
+}
+```
+
+## HTTP API
+
+### Endpoints
+
+- `GET /actions` - List all registered actions with metadata
+- `POST /actions` - Execute action with JSON payload: `{"action": "name", "data": {...}}`
+
+### Response Formats
+
+```json
+// Success
+{"success": true, "action": "name", "result": {...}}
+
+// Error
+{"error": "message", "message": "details"}
+```
+
+## Testing Requirements
+
+### Test Structure
+
+- Unit tests for core components
+- Feature tests for HTTP endpoints
+- All tests must pass before commits
+- Use descriptive test method names
+
+### Test Configuration
+
+- Include `LaravelDataServiceProvider` in test case
+- Proper namespace usage required
+- Mock external dependencies
+
+## Error Handling
+
+### Controller Level
+
+- `ValidationException` → 400 with validation errors
+- `CannotCreateData` → 400 with format error
+- `InvalidArgumentException` → 400 with invalid data
+- `Throwable` → 500 with execution error
+
+### Action Level
+
+- Return structured arrays with success/error indicators
+- Include meaningful error messages
+- Log critical errors appropriately
+
+## Development Workflow
+
+### Before Committing
+
+1. Run tests: `vendor/bin/pest --no-coverage`
+2. Check autoloading: `composer install` (no PSR-4 warnings)
+3. Verify type hints and documentation
+4. Ensure proper error handling
+
+### When Adding Features
+
+1. Create action class extending `BaseAction`
+2. Create corresponding data class extending `Data`
+3. Add validation attributes as needed
+4. Write comprehensive tests
+5. Update documentation if needed
+
+## Common Issues & Solutions
+
+### PSR-4 Autoloading
+
+- Test classes must have proper namespaces
+- Import all required classes including exceptions
+- Follow Laravel package structure conventions
+
+### Type Hinting
+
+- Use `@var` docblocks for IDE support in action handlers
+- Always specify return types on methods
+- Use union types where appropriate (PHP 8.0+)
+
+### Validation
+
+- Use Spatie Laravel Data attributes for validation
+- Handle validation exceptions in HTTP controller
+- Provide meaningful validation error messages
+
+## Package Dependencies
+
+```json
+{
+  "php": ">=8.3",
+  "illuminate/support": "^12.30",
+  "spatie/laravel-data": "^4.0"
+}
+```
+
+## Best Practices
+
+- Keep actions focused and single-purpose
+- Use descriptive action names (kebab-case)
+- Implement proper authorization where needed
+- Return consistent data structures
+- Write tests for all public methods
+- Document complex business logic

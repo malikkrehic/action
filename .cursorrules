@@ -1,0 +1,147 @@
+# MK Action Package - Cursor AI Rules
+
+## Project Overview
+
+This is a Laravel PHP package called "mk/action" that provides a powerful action system with fluent API, validation, and HTTP endpoints.
+
+## Code Style & Standards
+
+- **PHP Version**: 8.3+
+- **PSR Standards**: Follow PSR-4 autoloading, PSR-12 coding style
+- **Type Safety**: Always use strict types, type hints, and return types
+- **Laravel Conventions**: Follow Laravel naming and structure conventions
+
+## Package Structure
+
+```
+src/
+├── ActionServiceProvider.php      # Service provider with auto-discovery
+├── ActionRegistry.php             # Action registry management
+├── ActionManager.php              # Fluent API manager
+├── ActionBuilder.php              # Fluent builder pattern
+├── BaseAction.php                 # Abstract base class
+├── Data/ActionData.php            # Request data object
+├── Facades/Action.php             # Laravel facade
+├── Http/Controllers/ActionController.php  # HTTP endpoints
+└── routes/web.php                 # Route definitions
+```
+
+## Key Patterns
+
+### Action Creation Pattern
+
+```php
+class CreateUserAction extends BaseAction
+{
+    public static function name(): string
+    {
+        return 'create-user';
+    }
+
+    public static function getDataType(): string
+    {
+        return CreateUserData::class;
+    }
+
+    public function handle(Data $data): array
+    {
+        /** @var CreateUserData $data */
+        // Implementation with perfect type hinting
+    }
+}
+```
+
+### Fluent API Usage
+
+```php
+// Primary usage pattern
+Action::make('create-user')
+    ->with(['name' => 'John', 'email' => 'john@example.com'])
+    ->execute();
+
+// Direct execution
+Action::execute('create-user', $data);
+```
+
+### Data Objects with Validation
+
+```php
+class CreateUserData extends Data
+{
+    public function __construct(
+        #[Required]
+        #[Min(2)]
+        public string $name,
+
+        #[Required]
+        #[Email]
+        #[Unique('users', 'email')]
+        public string $email,
+    ) {}
+}
+```
+
+## Development Guidelines
+
+### When Creating Actions:
+
+1. Extend `BaseAction`
+2. Implement required abstract methods
+3. Use proper type hints with `@var` docblocks for IDE support
+4. Handle exceptions and return structured arrays
+5. Use `public static function getDataType(): string` (not protected)
+
+### When Creating Data Objects:
+
+1. Extend `Spatie\LaravelData\Data`
+2. Use validation attributes for automatic validation
+3. Use constructor property promotion
+4. Keep data objects simple and focused
+
+### Testing:
+
+1. All test classes must use proper namespaces (`MK\Action\Tests\Unit\`, `MK\Action\Tests\Feature\`)
+2. Import all required classes including `InvalidArgumentException`
+3. Use descriptive test method names
+4. Test both success and failure scenarios
+
+### Error Handling:
+
+1. HTTP Controller returns proper status codes (400, 404, 500)
+2. Catch `ValidationException`, `CannotCreateData`, and `InvalidArgumentException`
+3. Return structured JSON responses with meaningful messages
+
+## HTTP Endpoints
+
+- `GET /actions` - List all available actions with metadata
+- `POST /actions` - Execute action by name with data payload
+
+## Dependencies
+
+- PHP >= 8.3
+- Laravel >= 12.30
+- Spatie Laravel Data >= 4.0
+- Orchestra Testbench for testing
+- Pest for testing framework
+
+## Common Pitfalls to Avoid
+
+1. Don't use `protected` for `getDataType()` method - must be `public`
+2. Don't forget namespace declarations in test files
+3. Don't forget to import `InvalidArgumentException` in tests
+4. Don't use generic `Data` type hints - use specific data classes with `@var` docblocks
+5. Don't forget to register `LaravelDataServiceProvider` in tests
+
+## File Naming
+
+- Actions: `{Name}Action.php`
+- Data objects: `{Name}Data.php`
+- Tests: `{Class}Test.php`
+- Follow Laravel conventions for controllers, facades, etc.
+
+## When Making Changes
+
+1. Run tests after any modification: `vendor/bin/pest --no-coverage`
+2. Check PSR-4 compliance: `composer install` should show no warnings
+3. Ensure all type hints are correct
+4. Update documentation if adding new features

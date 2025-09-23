@@ -1,0 +1,71 @@
+{
+  "name": "mk/action",
+  "version": "1.0.0",
+  "description": "A powerful Laravel action system for handling business logic with validation and routing",
+  "type": "library",
+  "license": "MIT",
+  "keywords": [
+    "laravel",
+    "action",
+    "business-logic",
+    "validation",
+    "routing"
+  ],
+  "authors": [
+    {
+      "name": "MK",
+      "email": "contact@example.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "MK\\Action\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "MK\\Action\\Tests\\": "tests/"
+    }
+  },
+  "require": {
+    "php": ">=8.3",
+    "illuminate/support": "^12.30",
+    "illuminate/http": "^12.30",
+    "illuminate/routing": "^12.30",
+    "illuminate/validation": "^12.30",
+    "spatie/laravel-data": "^4.0"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^10.0",
+    "phpunit/phpunit": "^12.0",
+    "pestphp/pest": "^4.0",
+    "pestphp/pest-plugin-laravel": "^4.0",
+    "pestphp/pest-plugin-faker": "^4.0"
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "MK\\Action\\ActionServiceProvider"
+      ]
+    }
+  },
+  "config": {
+    "sort-packages": true,
+    "preferred-install": "dist",
+    "optimize-autoloader": true,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true,
+  "scripts": {
+    "test": "vendor/bin/pest",
+    "test-coverage": "vendor/bin/pest --coverage",
+    "test-unit": "vendor/bin/pest tests/Unit",
+    "test-feature": "vendor/bin/pest tests/Feature",
+    "test-parallel": "vendor/bin/pest --parallel",
+    "analyse": "vendor/bin/phpstan analyse",
+    "format": "vendor/bin/php-cs-fixer fix"
+  }
+}
