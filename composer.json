@@ -1,6 +1,5 @@
 {
   "name": "mk/action",
-  "version": "1.0.0",
   "description": "A powerful Laravel action system for handling business logic with validation and routing",
   "type": "library",
   "license": "MIT",
