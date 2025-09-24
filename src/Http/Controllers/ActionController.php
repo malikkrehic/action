@@ -5,10 +5,10 @@ namespace MK\Action\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Validation\ValidationException;
 use MK\Action\ActionRegistry;
 use MK\Action\Data\ActionData;
 use InvalidArgumentException;
-use Spatie\LaravelData\Exceptions\ValidationException;
 use Spatie\LaravelData\Exceptions\CannotCreateData;
 use Throwable;
 
@@ -38,7 +38,7 @@ class ActionController extends Controller
     /**
      * Execute an action.
      */
-    public function store(Request $request): JsonResponse
+    public function handle(Request $request): JsonResponse
     {
         try {
             $actionData = ActionData::from($request->all());
