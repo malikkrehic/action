@@ -8,6 +8,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Validation\ValidationException;
 use MK\Action\ActionRegistry;
 use MK\Action\Data\ActionData;
+use MK\Action\Data\ActionExecuteResponseData;
 use InvalidArgumentException;
 use Spatie\LaravelData\Exceptions\CannotCreateData;
 use Throwable;
@@ -44,11 +45,15 @@ class ActionController extends Controller
             $actionData = ActionData::from($request->all());
             
             if (!$this->registry->has($actionData->action)) {
-                return response()->json([
-                    'error' => 'Action not found',
-                    'action' => $actionData->action,
-                    'available_actions' => $this->registry->names(),
-                ], 404);
+                $data = new ActionExecuteResponseData(
+                    success: false,
+                    action: $actionData->action,
+                    error: 'Action not found',
+                    data: [
+                        'available_actions' => $this->registry->names()
+                    ],
+                );
+                return $data->toResponse($request)->setStatusCode(404);
             }
 
             $actionClass = $this->registry->get($actionData->action);
@@ -60,36 +65,46 @@ class ActionController extends Controller
             
             $result = $action($data);
 
-            return response()->json([
-                'success' => true,
-                'action' => $actionData->action,
-                'result' => $result,
-            ]);
+            $responseData = new ActionExecuteResponseData(
+                success: true,
+                action: $actionData->action,
+                data: $result,
+            );
+
+            return $responseData->toResponse($request)->setStatusCode(200);
 
         } catch (ValidationException $e) {
-            return response()->json([
-                'error' => 'Validation failed',
-                'message' => $e->getMessage(),
-                'errors' => $e->errors(),
-            ], 400);
+            $data = new ActionExecuteResponseData(
+                success: false,
+                error: 'Validation failed',
+                message: $e->getMessage(),
+                errors: $e->errors(),
+            );
+            return $data->toResponse($request)->setStatusCode(400);
             
         } catch (CannotCreateData $e) {
-            return response()->json([
-                'error' => 'Invalid data format',
-                'message' => $e->getMessage(),
-            ], 400);
+            $data = new ActionExecuteResponseData(
+                success: false,
+                error: 'Invalid data format',
+                message: $e->getMessage(),
+            );
+            return response()->json($data->toArray(), 400);
             
         } catch (InvalidArgumentException $e) {
-            return response()->json([
-                'error' => 'Invalid action or data',
-                'message' => $e->getMessage(),
-            ], 400);
+            $data = new ActionExecuteResponseData(
+                success: false,
+                error: 'Invalid action or data',
+                message: $e->getMessage(),
+            );
+            return response()->json($data->toArray(), 400);
             
         } catch (Throwable $e) {
-            return response()->json([
-                'error' => 'Action execution failed',
-                'message' => $e->getMessage(),
-            ], 500);
+            $data = new ActionExecuteResponseData(
+                success: false,
+                error: 'Action execution failed',
+                message: $e->getMessage(),
+            );
+            return $data->toResponse($request)->setStatusCode(500);
         }
     }
 }
