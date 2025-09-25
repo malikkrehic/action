@@ -4,6 +4,7 @@ namespace MK\Action;
 
 use Illuminate\Support\ServiceProvider;
 use MK\Action\Http\Controllers\ActionController;
+use MK\Action\Console\MakeActionCommand;
 
 class ActionServiceProvider extends ServiceProvider
 {
@@ -25,6 +26,13 @@ class ActionServiceProvider extends ServiceProvider
         
         // Auto-discover actions in the application
         $this->discoverActions();
+
+        // Register console commands
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                MakeActionCommand::class,
+            ]);
+        }
     }
 
     /**

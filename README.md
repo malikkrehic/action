@@ -10,6 +10,85 @@ composer require mk/action
 
 ## Usage
 
+### Artisan Generator
+
+Generate a new Action (and optional Data DTO) under your application's domain structure:
+
+```bash
+php artisan make:action TestAction --domain=Design --data=TestData
+```
+
+This will generate:
+
+```
+app/Domain/Design/Actions/TestAction.php
+app/Domain/Design/Data/TestData.php   # only if it does not already exist
+```
+
+Generated `TestAction` example:
+
+```php
+<?php
+
+namespace App\Domain\Design\Actions;
+
+use App\Domain\Design\Data\TestData;
+use Spatie\LaravelData\Data;
+use Illuminate\Support\Facades\Log;
+use MK\Action\BaseAction;
+
+class TestAction extends BaseAction
+{
+    public static function name(): string
+    {
+        return 'test';
+    }
+
+    public static function description(): string
+    {
+        return 'Description.';
+    }
+
+    public static function getDataType(): string
+    {
+        return TestData::class;
+    }
+
+    /**
+     * @param TestData $data
+     */
+    public function handle(Data $data): array
+    {
+        return [
+            'success' => true,
+            'result' => 'Hello from TestAction',
+        ];
+    }
+}
+```
+
+Generated `TestData` example:
+
+```php
+<?php
+
+namespace App\Domain\Design\Data;
+
+use Spatie\LaravelData\Data;
+
+class TestData extends Data
+{
+    public string $name;
+    public string $email;
+}
+```
+
+Notes:
+
+- `--domain` is required and determines the target namespace and path under `app/Domain/{Domain}`.
+- `--data` is optional. If provided and the DTO does not exist, it will be created in `App\Domain\{Domain}\Data`.
+- If `--data` is omitted, the generated action defaults to `Spatie\LaravelData\Data` as its data type.
+
 ### Creating an Action
 
 Create a new action by extending the `BaseAction` class:
@@ -180,7 +259,7 @@ Response:
 
 - PHP >= 8.3
 - Laravel >= 12.30
-- Spatie Laravel Data >= 5.0
+- Spatie Laravel Data >= 4.0
 
 ## Testing
 

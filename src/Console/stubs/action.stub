@@ -1,0 +1,37 @@
+<?php
+
+namespace {{ namespace }};
+
+{{ data_import_stmt }}
+use Spatie\LaravelData\Data;
+use Illuminate\Support\Facades\Log;
+use MK\Action\BaseAction;
+
+class {{ class }} extends BaseAction
+{
+    public static function name(): string
+    {
+        return '{{ action_name }}';
+    }
+
+    public static function description(): string
+    {
+        return 'Description.';
+    }
+
+    public static function getDataType(): string
+    {
+        return {{ data_short }}::class;
+    }
+
+    /**
+     * @param {{ data_short }} $data
+     */
+    public function handle(Data $data): array
+    {
+        return [
+            'success' => true,
+            'result' => '{{ hello_message }}',
+        ];
+    }
+}
